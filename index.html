@@ -42,6 +42,7 @@ h1{
     margin-bottom:20px;
 }
 
+/* CURRENT VIEW */
 .current-view{
     background:#ecfdf5;
     border:1px solid #86efac;
@@ -53,18 +54,17 @@ h1{
     margin-bottom:20px;
 }
 
-.view-controls{
-    margin-bottom:20px;
-}
-
+/* VIEW SELECT */
 select{
     width:100%;
     padding:14px;
     border-radius:10px;
     border:1px solid #d1d5db;
     font-size:16px;
+    margin-bottom:15px;
 }
 
+/* INPUTS */
 .input-group{
     margin-bottom:15px;
 }
@@ -90,15 +90,12 @@ input:focus{
     box-shadow:0 0 0 4px rgba(37,99,235,.15);
 }
 
-.metrics{
-    margin-top:20px;
-}
-
+/* METRICS */
 .metric{
     background:#f9fafb;
     padding:16px;
     border-radius:12px;
-    margin-bottom:12px;
+    margin-top:12px;
 }
 
 .metric-title{
@@ -112,6 +109,7 @@ input:focus{
     margin-top:5px;
 }
 
+/* PROGRESS */
 .progress-bar{
     height:18px;
     background:#e5e7eb;
@@ -127,6 +125,7 @@ input:focus{
     transition:.3s;
 }
 
+/* BUTTON */
 .delete-btn{
     width:100%;
     margin-top:15px;
@@ -137,13 +136,13 @@ input:focus{
     color:white;
     font-weight:bold;
     cursor:pointer;
+    display:none;
 }
 
 .footer{
     margin-top:15px;
     text-align:center;
     color:#6b7280;
-    font-size:14px;
 }
 
 </style>
@@ -155,21 +154,18 @@ input:focus{
 <div class="card">
 
 <h1>📊 Budget Pacing Tool</h1>
-
-<div class="subtitle">
-Auto-save + Multiple Views (Local Storage)
-</div>
+<div class="subtitle">Auto-save + Multi Views</div>
 
 <div class="current-view" id="currentView">
-No View Selected
+No Active View
 </div>
 
-<div class="view-controls">
+<!-- VIEW SELECT -->
 <select id="viewSelect">
-<option value="">➕ Create / Switch View</option>
+<option value="">➕ Create New View</option>
 </select>
-</div>
 
+<!-- INPUTS -->
 <div class="input-group">
 <label>Total Budget (€)</label>
 <input type="number" id="totalBudget" placeholder="1000">
@@ -190,8 +186,7 @@ No View Selected
 <input type="number" id="tiktokSpent" placeholder="0">
 </div>
 
-<div class="metrics">
-
+<!-- METRICS -->
 <div class="metric">
 <div class="metric-title">Remaining Budget</div>
 <div class="metric-value" id="remaining">€0.00</div>
@@ -208,20 +203,20 @@ No View Selected
 
 <div class="footer" id="daysLeft"></div>
 
+<!-- DELETE -->
 <button class="delete-btn" id="deleteBtn">
-🗑 Delete Current View
+🗑 Delete View
 </button>
-
-</div>
 
 </div>
 </div>
 
 <script>
 
-const KEY = "budget_views_v2";
-const CURRENT_KEY = "budget_current_view_v2";
+const KEY = "budget_views_final_v1";
+const CURRENT_KEY = "budget_current_view_final_v1";
 
+/* STORAGE */
 function getViews(){
     return JSON.parse(localStorage.getItem(KEY)) || {};
 }
@@ -230,20 +225,21 @@ function saveViews(v){
     localStorage.setItem(KEY, JSON.stringify(v));
 }
 
-function setCurrentView(name){
-    localStorage.setItem(CURRENT_KEY, name);
+function setCurrent(v){
+    localStorage.setItem(CURRENT_KEY, v);
 }
 
-function getCurrentView(){
+function getCurrent(){
     return localStorage.getItem(CURRENT_KEY);
 }
 
+/* UI */
 function refreshDropdown(){
 
     const select = document.getElementById("viewSelect");
     const views = getViews();
 
-    select.innerHTML = `<option value="">➕ Create / Switch View</option>`;
+    select.innerHTML = `<option value="">➕ Create New View</option>`;
 
     Object.keys(views).forEach(name=>{
         const opt = document.createElement("option");
@@ -252,10 +248,11 @@ function refreshDropdown(){
         select.appendChild(opt);
     });
 
-    const current = getCurrentView();
+    const current = getCurrent();
     if(current) select.value = current;
 }
 
+/* LOAD */
 function loadView(name){
 
     const views = getViews();
@@ -266,15 +263,18 @@ function loadView(name){
     document.getElementById("googleSpent").value = views[name].googleSpent || 0;
     document.getElementById("tiktokSpent").value = views[name].tiktokSpent || 0;
 
-    setCurrentView(name);
+    setCurrent(name);
 
     document.getElementById("currentView").innerText =
         "🟢 Current View: " + name;
 
+    document.getElementById("deleteBtn").style.display = "block";
+
     calculate();
 }
 
-function createNewView(){
+/* CREATE VIEW */
+function createView(){
 
     const name = prompt("Enter View Name:");
 
@@ -291,15 +291,15 @@ function createNewView(){
 
     saveViews(views);
 
-    setCurrentView(name);
-
     refreshDropdown();
+
     loadView(name);
 }
 
+/* AUTO SAVE */
 function autoSave(){
 
-    const current = getCurrentView();
+    const current = getCurrent();
     if(!current) return;
 
     const views = getViews();
@@ -314,10 +314,11 @@ function autoSave(){
     saveViews(views);
 }
 
+/* DELETE */
 function deleteView(){
 
-    const current = getCurrentView();
-    if(!current) return alert("No view selected");
+    const current = getCurrent();
+    if(!current) return;
 
     const views = getViews();
     delete views[current];
@@ -326,7 +327,9 @@ function deleteView(){
 
     localStorage.removeItem(CURRENT_KEY);
 
-    document.getElementById("currentView").innerText = "No View Selected";
+    document.getElementById("currentView").innerText = "No Active View";
+
+    document.getElementById("deleteBtn").style.display = "none";
 
     refreshDropdown();
 
@@ -338,6 +341,7 @@ function deleteView(){
     calculate();
 }
 
+/* CALC */
 function calculate(){
 
     const total = Number(document.getElementById("totalBudget").value) || 0;
@@ -348,15 +352,15 @@ function calculate(){
     const spent = meta + google + tiktok;
     const remaining = total - spent;
 
-    const today = new Date();
-    const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1,0).getDate();
-    const daysLeft = daysInMonth - today.getDate() + 1;
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1,0).getDate();
+    const daysLeft = daysInMonth - now.getDate() + 1;
 
     const daily = remaining > 0 ? remaining / daysLeft : 0;
 
     document.getElementById("remaining").innerText = "€" + remaining.toFixed(2);
     document.getElementById("daily").innerText = "€" + daily.toFixed(2);
-    document.getElementById("daysLeft").innerText = daysLeft + " days left this month";
+    document.getElementById("daysLeft").innerText = daysLeft + " days left";
 
     const progress = total > 0 ? (spent / total) * 100 : 0;
     document.getElementById("progress").style.width = Math.min(progress,100) + "%";
@@ -364,18 +368,18 @@ function calculate(){
 
 /* EVENTS */
 
+/* dropdown */
 document.getElementById("viewSelect").addEventListener("change", function(){
 
-    const val = this.value;
-
-    if(!val){
-        createNewView();
+    if(this.value === ""){
+        createView();
         return;
     }
 
-    loadView(val);
+    loadView(this.value);
 });
 
+/* auto save on input */
 document.querySelectorAll("input").forEach(i=>{
     i.addEventListener("input", ()=>{
         calculate();
@@ -383,13 +387,10 @@ document.querySelectorAll("input").forEach(i=>{
     });
 });
 
-document.getElementById("deleteBtn").addEventListener("click", deleteView);
-
 /* INIT */
-
 refreshDropdown();
 
-const last = getCurrentView();
+const last = getCurrent();
 if(last){
     loadView(last);
 }
