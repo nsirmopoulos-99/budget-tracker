@@ -3,11 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Budget Pacing Tool</title>
 
 <style>
-
 *{
     box-sizing:border-box;
     margin:0;
@@ -34,8 +32,8 @@ body{
 
 h1{
     text-align:center;
-    margin-bottom:10px;
     color:#1f2937;
+    margin-bottom:8px;
 }
 
 .subtitle{
@@ -44,41 +42,42 @@ h1{
     margin-bottom:25px;
 }
 
-.section-title{
-    margin-bottom:10px;
+.current-view{
+    background:#ecfdf5;
+    border:1px solid #86efac;
+    color:#166534;
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:20px;
     font-weight:bold;
+    text-align:center;
+}
+
+.section-title{
+    font-weight:bold;
+    margin-bottom:10px;
     color:#374151;
 }
 
 .view-controls{
     display:flex;
     gap:10px;
+    margin-bottom:15px;
+}
+
+.buttons{
+    display:flex;
+    gap:10px;
     margin-bottom:25px;
-}
-
-.view-controls select,
-.view-controls input{
-    flex:1;
-}
-
-.input-group{
-    margin-bottom:18px;
-}
-
-label{
-    display:block;
-    margin-bottom:6px;
-    font-weight:600;
-    color:#374151;
 }
 
 input,
 select{
     width:100%;
     padding:14px;
-    font-size:16px;
     border:1px solid #d1d5db;
     border-radius:10px;
+    font-size:16px;
 }
 
 input:focus,
@@ -88,19 +87,12 @@ select:focus{
     box-shadow:0 0 0 4px rgba(37,99,235,.15);
 }
 
-.buttons{
-    display:flex;
-    gap:10px;
-    margin-bottom:25px;
-}
-
 button{
     flex:1;
     border:none;
     border-radius:10px;
     padding:14px;
     cursor:pointer;
-    font-size:15px;
     font-weight:bold;
 }
 
@@ -114,8 +106,15 @@ button{
     color:white;
 }
 
-.summary{
-    margin-top:10px;
+.input-group{
+    margin-bottom:18px;
+}
+
+label{
+    display:block;
+    margin-bottom:6px;
+    font-weight:600;
+    color:#374151;
 }
 
 .metric{
@@ -126,14 +125,14 @@ button{
 }
 
 .metric-title{
-    font-size:14px;
     color:#6b7280;
+    font-size:14px;
 }
 
 .metric-value{
     font-size:28px;
     font-weight:bold;
-    margin-top:4px;
+    margin-top:5px;
 }
 
 .progress-container{
@@ -161,6 +160,13 @@ button{
     color:#6b7280;
 }
 
+.autosave{
+    text-align:center;
+    color:#16a34a;
+    margin-top:12px;
+    font-size:14px;
+}
+
 @media(max-width:600px){
 
 .view-controls,
@@ -173,24 +179,26 @@ button{
 }
 
 }
-
 </style>
 </head>
 <body>
 
 <div class="container">
-
 <div class="card">
 
 <h1>📊 Budget Pacing Tool</h1>
-
 <div class="subtitle">
 Save multiple budget views locally
+</div>
+
+<div class="current-view" id="currentView">
+No View Selected
 </div>
 
 <div class="section-title">Saved Views</div>
 
 <div class="view-controls">
+
 <select id="savedViews">
 <option value="">Select View</option>
 </select>
@@ -199,16 +207,23 @@ Save multiple budget views locally
 type="text"
 id="viewName"
 placeholder="New View Name">
+
 </div>
 
 <div class="buttons">
-<button class="save-btn" onclick="saveView()">
+
+<button
+class="save-btn"
+onclick="saveView()">
 💾 Save View
 </button>
 
-<button class="delete-btn" onclick="deleteView()">
+<button
+class="delete-btn"
+onclick="deleteView()">
 🗑 Delete View
 </button>
+
 </div>
 
 <div class="input-group">
@@ -230,8 +245,6 @@ placeholder="New View Name">
 <label>TikTok Spent (€)</label>
 <input type="number" id="tiktokSpent" placeholder="0">
 </div>
-
-<div class="summary">
 
 <div class="metric">
 <div class="metric-title">Remaining Budget</div>
@@ -268,30 +281,30 @@ id="daysRemaining">
 Days remaining this month: -
 </div>
 
+<div class="autosave" id="autosaveStatus">
 </div>
 
 </div>
-
 </div>
 
 <script>
 
 const STORAGE_KEY = "budget_pacing_views";
 
-function getViews() {
+function getViews(){
     return JSON.parse(
         localStorage.getItem(STORAGE_KEY)
     ) || {};
 }
 
-function saveViews(views) {
+function saveViews(data){
     localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(views)
+        JSON.stringify(data)
     );
 }
 
-function refreshDropdown() {
+function refreshDropdown(){
 
     const views = getViews();
 
@@ -301,7 +314,7 @@ function refreshDropdown() {
     dropdown.innerHTML =
         '<option value="">Select View</option>';
 
-    Object.keys(views).forEach(name => {
+    Object.keys(views).forEach(name=>{
 
         const option =
             document.createElement("option");
@@ -315,23 +328,21 @@ function refreshDropdown() {
 
 }
 
-function saveView() {
+function saveView(){
 
-    const viewName =
+    const name =
         document.getElementById("viewName")
         .value
         .trim();
 
-    if(!viewName){
-
-        alert("Please enter a view name");
-
+    if(!name){
+        alert("Enter a view name");
         return;
     }
 
     const views = getViews();
 
-    views[viewName] = {
+    views[name] = {
 
         totalBudget:
             document.getElementById("totalBudget").value,
@@ -352,13 +363,17 @@ function saveView() {
     refreshDropdown();
 
     document.getElementById("savedViews").value =
-        viewName;
+        name;
 
-    alert("View saved!");
+    document.getElementById("viewName").value = "";
+
+    updateCurrentView(name);
+
+    showAutoSave("View saved");
 
 }
 
-function loadView(name) {
+function loadView(name){
 
     const views = getViews();
 
@@ -376,19 +391,52 @@ function loadView(name) {
     document.getElementById("tiktokSpent").value =
         views[name].tiktokSpent;
 
+    updateCurrentView(name);
+
     calculate();
 
 }
 
-function deleteView() {
+function autoSaveCurrentView(){
 
     const selected =
-        document.getElementById("savedViews").value;
+        document.getElementById("savedViews")
+        .value;
+
+    if(!selected) return;
+
+    const views = getViews();
+
+    views[selected] = {
+
+        totalBudget:
+            document.getElementById("totalBudget").value,
+
+        metaSpent:
+            document.getElementById("metaSpent").value,
+
+        googleSpent:
+            document.getElementById("googleSpent").value,
+
+        tiktokSpent:
+            document.getElementById("tiktokSpent").value
+
+    };
+
+    saveViews(views);
+
+    showAutoSave("Auto-saved");
+
+}
+
+function deleteView(){
+
+    const selected =
+        document.getElementById("savedViews")
+        .value;
 
     if(!selected){
-
         alert("Select a view");
-
         return;
     }
 
@@ -400,13 +448,43 @@ function deleteView() {
 
     refreshDropdown();
 
-    document.getElementById("viewName").value = "";
+    document.getElementById("savedViews").value = "";
 
-    alert("View deleted");
+    updateCurrentView("");
+
+    showAutoSave("View deleted");
 
 }
 
-function calculate() {
+function updateCurrentView(name){
+
+    const badge =
+        document.getElementById("currentView");
+
+    badge.textContent =
+        name
+        ? "🟢 Current View: " + name
+        : "No View Selected";
+
+}
+
+function showAutoSave(text){
+
+    const el =
+        document.getElementById("autosaveStatus");
+
+    el.textContent = text;
+
+    clearTimeout(window.autoSaveTimer);
+
+    window.autoSaveTimer =
+        setTimeout(()=>{
+            el.textContent = "";
+        },2000);
+
+}
+
+function calculate(){
 
     const total =
         Number(
@@ -437,37 +515,36 @@ function calculate() {
     const today =
         new Date();
 
-    const year =
-        today.getFullYear();
-
-    const month =
-        today.getMonth();
-
     const daysInMonth =
-        new Date(year, month + 1, 0)
-        .getDate();
-
-    const currentDay =
-        today.getDate();
+        new Date(
+            today.getFullYear(),
+            today.getMonth()+1,
+            0
+        ).getDate();
 
     const daysRemaining =
-        daysInMonth - currentDay + 1;
+        daysInMonth -
+        today.getDate() +
+        1;
 
     const dailyBudget =
         remaining > 0
         ? remaining / daysRemaining
         : 0;
 
-    document.getElementById("remainingBudget")
-        .innerText =
+    document.getElementById(
+        "remainingBudget"
+    ).textContent =
         "€" + remaining.toFixed(2);
 
-    document.getElementById("dailyBudget")
-        .innerText =
+    document.getElementById(
+        "dailyBudget"
+    ).textContent =
         "€" + dailyBudget.toFixed(2);
 
-    document.getElementById("daysRemaining")
-        .innerText =
+    document.getElementById(
+        "daysRemaining"
+    ).textContent =
         "Days remaining this month: "
         + daysRemaining;
 
@@ -476,15 +553,16 @@ function calculate() {
         ? (spent / total) * 100
         : 0;
 
-    document.getElementById("progressFill")
-        .style.width =
+    document.getElementById(
+        "progressFill"
+    ).style.width =
         Math.min(progress,100) + "%";
 
 }
 
 document
 .getElementById("savedViews")
-.addEventListener("change", function() {
+.addEventListener("change",function(){
 
     loadView(this.value);
 
@@ -492,17 +570,19 @@ document
 
 document
 .querySelectorAll("input[type='number']")
-.forEach(input => {
+.forEach(input=>{
 
-    input.addEventListener(
-        "input",
-        calculate
-    );
+    input.addEventListener("input",()=>{
+
+        calculate();
+
+        autoSaveCurrentView();
+
+    });
 
 });
 
 refreshDropdown();
-
 calculate();
 
 </script>
