@@ -19,7 +19,7 @@ body{
 }
 
 .container{
-    max-width:700px;
+    max-width:720px;
     margin:auto;
 }
 
@@ -32,14 +32,14 @@ body{
 
 h1{
     text-align:center;
-    color:#1f2937;
     margin-bottom:8px;
+    color:#1f2937;
 }
 
 .subtitle{
     text-align:center;
     color:#6b7280;
-    margin-bottom:25px;
+    margin-bottom:20px;
 }
 
 .current-view{
@@ -48,66 +48,25 @@ h1{
     color:#166534;
     padding:10px;
     border-radius:10px;
-    margin-bottom:20px;
-    font-weight:bold;
     text-align:center;
-}
-
-.section-title{
     font-weight:bold;
-    margin-bottom:10px;
-    color:#374151;
+    margin-bottom:20px;
 }
 
 .view-controls{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
+    margin-bottom:20px;
 }
 
-.buttons{
-    display:flex;
-    gap:10px;
-    margin-bottom:25px;
-}
-
-input,
 select{
     width:100%;
     padding:14px;
-    border:1px solid #d1d5db;
     border-radius:10px;
+    border:1px solid #d1d5db;
     font-size:16px;
 }
 
-input:focus,
-select:focus{
-    outline:none;
-    border-color:#2563eb;
-    box-shadow:0 0 0 4px rgba(37,99,235,.15);
-}
-
-button{
-    flex:1;
-    border:none;
-    border-radius:10px;
-    padding:14px;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-.save-btn{
-    background:#2563eb;
-    color:white;
-}
-
-.delete-btn{
-    background:#ef4444;
-    color:white;
-}
-
 .input-group{
-    margin-bottom:18px;
+    margin-bottom:15px;
 }
 
 label{
@@ -115,6 +74,24 @@ label{
     margin-bottom:6px;
     font-weight:600;
     color:#374151;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    font-size:16px;
+}
+
+input:focus{
+    outline:none;
+    border-color:#2563eb;
+    box-shadow:0 0 0 4px rgba(37,99,235,.15);
+}
+
+.metrics{
+    margin-top:20px;
 }
 
 .metric{
@@ -125,26 +102,22 @@ label{
 }
 
 .metric-title{
-    color:#6b7280;
     font-size:14px;
+    color:#6b7280;
 }
 
 .metric-value{
-    font-size:28px;
+    font-size:26px;
     font-weight:bold;
     margin-top:5px;
 }
 
-.progress-container{
-    margin-top:20px;
-}
-
 .progress-bar{
-    width:100%;
     height:18px;
     background:#e5e7eb;
     border-radius:999px;
     overflow:hidden;
+    margin-top:15px;
 }
 
 .progress-fill{
@@ -154,76 +127,47 @@ label{
     transition:.3s;
 }
 
-.footer-info{
+.delete-btn{
+    width:100%;
+    margin-top:15px;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#ef4444;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.footer{
     margin-top:15px;
     text-align:center;
     color:#6b7280;
-}
-
-.autosave{
-    text-align:center;
-    color:#16a34a;
-    margin-top:12px;
     font-size:14px;
 }
 
-@media(max-width:600px){
-
-.view-controls,
-.buttons{
-    flex-direction:column;
-}
-
-.metric-value{
-    font-size:22px;
-}
-
-}
 </style>
 </head>
+
 <body>
 
 <div class="container">
 <div class="card">
 
 <h1>📊 Budget Pacing Tool</h1>
+
 <div class="subtitle">
-Save multiple budget views locally
+Auto-save + Multiple Views (Local Storage)
 </div>
 
 <div class="current-view" id="currentView">
 No View Selected
 </div>
 
-<div class="section-title">Saved Views</div>
-
 <div class="view-controls">
-
-<select id="savedViews">
-<option value="">Select View</option>
+<select id="viewSelect">
+<option value="">➕ Create / Switch View</option>
 </select>
-
-<input
-type="text"
-id="viewName"
-placeholder="New View Name">
-
-</div>
-
-<div class="buttons">
-
-<button
-class="save-btn"
-onclick="saveView()">
-💾 Save View
-</button>
-
-<button
-class="delete-btn"
-onclick="deleteView()">
-🗑 Delete View
-</button>
-
 </div>
 
 <div class="input-group">
@@ -246,42 +190,28 @@ onclick="deleteView()">
 <input type="number" id="tiktokSpent" placeholder="0">
 </div>
 
+<div class="metrics">
+
 <div class="metric">
 <div class="metric-title">Remaining Budget</div>
-<div class="metric-value" id="remainingBudget">
-€0.00
-</div>
+<div class="metric-value" id="remaining">€0.00</div>
 </div>
 
 <div class="metric">
-<div class="metric-title">Recommended Daily Budget</div>
-<div class="metric-value" id="dailyBudget">
-€0.00
-</div>
-</div>
-
-<div class="progress-container">
-
-<div style="margin-bottom:8px;font-weight:bold;">
-Budget Consumed
+<div class="metric-title">Daily Budget</div>
+<div class="metric-value" id="daily">€0.00</div>
 </div>
 
 <div class="progress-bar">
-<div
-class="progress-fill"
-id="progressFill">
-</div>
+<div class="progress-fill" id="progress"></div>
 </div>
 
-</div>
+<div class="footer" id="daysLeft"></div>
 
-<div
-class="footer-info"
-id="daysRemaining">
-Days remaining this month: -
-</div>
+<button class="delete-btn" id="deleteBtn">
+🗑 Delete Current View
+</button>
 
-<div class="autosave" id="autosaveStatus">
 </div>
 
 </div>
@@ -289,300 +219,181 @@ Days remaining this month: -
 
 <script>
 
-const STORAGE_KEY = "budget_pacing_views";
+const KEY = "budget_views_v2";
+const CURRENT_KEY = "budget_current_view_v2";
 
 function getViews(){
-    return JSON.parse(
-        localStorage.getItem(STORAGE_KEY)
-    ) || {};
+    return JSON.parse(localStorage.getItem(KEY)) || {};
 }
 
-function saveViews(data){
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(data)
-    );
+function saveViews(v){
+    localStorage.setItem(KEY, JSON.stringify(v));
+}
+
+function setCurrentView(name){
+    localStorage.setItem(CURRENT_KEY, name);
+}
+
+function getCurrentView(){
+    return localStorage.getItem(CURRENT_KEY);
 }
 
 function refreshDropdown(){
 
+    const select = document.getElementById("viewSelect");
     const views = getViews();
 
-    const dropdown =
-        document.getElementById("savedViews");
-
-    dropdown.innerHTML =
-        '<option value="">Select View</option>';
+    select.innerHTML = `<option value="">➕ Create / Switch View</option>`;
 
     Object.keys(views).forEach(name=>{
-
-        const option =
-            document.createElement("option");
-
-        option.value = name;
-        option.textContent = name;
-
-        dropdown.appendChild(option);
-
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
     });
 
-}
-
-function saveView(){
-
-    const name =
-        document.getElementById("viewName")
-        .value
-        .trim();
-
-    if(!name){
-        alert("Enter a view name");
-        return;
-    }
-
-    const views = getViews();
-
-    views[name] = {
-
-        totalBudget:
-            document.getElementById("totalBudget").value,
-
-        metaSpent:
-            document.getElementById("metaSpent").value,
-
-        googleSpent:
-            document.getElementById("googleSpent").value,
-
-        tiktokSpent:
-            document.getElementById("tiktokSpent").value
-
-    };
-
-    saveViews(views);
-
-    refreshDropdown();
-
-    document.getElementById("savedViews").value =
-        name;
-
-    document.getElementById("viewName").value = "";
-
-    updateCurrentView(name);
-
-    showAutoSave("View saved");
-
+    const current = getCurrentView();
+    if(current) select.value = current;
 }
 
 function loadView(name){
 
     const views = getViews();
-
     if(!views[name]) return;
 
-    document.getElementById("totalBudget").value =
-        views[name].totalBudget;
+    document.getElementById("totalBudget").value = views[name].totalBudget || 0;
+    document.getElementById("metaSpent").value = views[name].metaSpent || 0;
+    document.getElementById("googleSpent").value = views[name].googleSpent || 0;
+    document.getElementById("tiktokSpent").value = views[name].tiktokSpent || 0;
 
-    document.getElementById("metaSpent").value =
-        views[name].metaSpent;
+    setCurrentView(name);
 
-    document.getElementById("googleSpent").value =
-        views[name].googleSpent;
-
-    document.getElementById("tiktokSpent").value =
-        views[name].tiktokSpent;
-
-    updateCurrentView(name);
+    document.getElementById("currentView").innerText =
+        "🟢 Current View: " + name;
 
     calculate();
-
 }
 
-function autoSaveCurrentView(){
+function createNewView(){
 
-    const selected =
-        document.getElementById("savedViews")
-        .value;
+    const name = prompt("Enter View Name:");
 
-    if(!selected) return;
+    if(!name) return;
 
     const views = getViews();
 
-    views[selected] = {
-
-        totalBudget:
-            document.getElementById("totalBudget").value,
-
-        metaSpent:
-            document.getElementById("metaSpent").value,
-
-        googleSpent:
-            document.getElementById("googleSpent").value,
-
-        tiktokSpent:
-            document.getElementById("tiktokSpent").value
-
+    views[name] = {
+        totalBudget:0,
+        metaSpent:0,
+        googleSpent:0,
+        tiktokSpent:0
     };
 
     saveViews(views);
 
-    showAutoSave("Auto-saved");
+    setCurrentView(name);
 
+    refreshDropdown();
+    loadView(name);
+}
+
+function autoSave(){
+
+    const current = getCurrentView();
+    if(!current) return;
+
+    const views = getViews();
+
+    views[current] = {
+        totalBudget: document.getElementById("totalBudget").value || 0,
+        metaSpent: document.getElementById("metaSpent").value || 0,
+        googleSpent: document.getElementById("googleSpent").value || 0,
+        tiktokSpent: document.getElementById("tiktokSpent").value || 0
+    };
+
+    saveViews(views);
 }
 
 function deleteView(){
 
-    const selected =
-        document.getElementById("savedViews")
-        .value;
-
-    if(!selected){
-        alert("Select a view");
-        return;
-    }
+    const current = getCurrentView();
+    if(!current) return alert("No view selected");
 
     const views = getViews();
-
-    delete views[selected];
+    delete views[current];
 
     saveViews(views);
 
+    localStorage.removeItem(CURRENT_KEY);
+
+    document.getElementById("currentView").innerText = "No View Selected";
+
     refreshDropdown();
 
-    document.getElementById("savedViews").value = "";
+    document.getElementById("totalBudget").value = 0;
+    document.getElementById("metaSpent").value = 0;
+    document.getElementById("googleSpent").value = 0;
+    document.getElementById("tiktokSpent").value = 0;
 
-    updateCurrentView("");
-
-    showAutoSave("View deleted");
-
-}
-
-function updateCurrentView(name){
-
-    const badge =
-        document.getElementById("currentView");
-
-    badge.textContent =
-        name
-        ? "🟢 Current View: " + name
-        : "No View Selected";
-
-}
-
-function showAutoSave(text){
-
-    const el =
-        document.getElementById("autosaveStatus");
-
-    el.textContent = text;
-
-    clearTimeout(window.autoSaveTimer);
-
-    window.autoSaveTimer =
-        setTimeout(()=>{
-            el.textContent = "";
-        },2000);
-
+    calculate();
 }
 
 function calculate(){
 
-    const total =
-        Number(
-            document.getElementById("totalBudget").value
-        ) || 0;
+    const total = Number(document.getElementById("totalBudget").value) || 0;
+    const meta = Number(document.getElementById("metaSpent").value) || 0;
+    const google = Number(document.getElementById("googleSpent").value) || 0;
+    const tiktok = Number(document.getElementById("tiktokSpent").value) || 0;
 
-    const meta =
-        Number(
-            document.getElementById("metaSpent").value
-        ) || 0;
+    const spent = meta + google + tiktok;
+    const remaining = total - spent;
 
-    const google =
-        Number(
-            document.getElementById("googleSpent").value
-        ) || 0;
+    const today = new Date();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth()+1,0).getDate();
+    const daysLeft = daysInMonth - today.getDate() + 1;
 
-    const tiktok =
-        Number(
-            document.getElementById("tiktokSpent").value
-        ) || 0;
+    const daily = remaining > 0 ? remaining / daysLeft : 0;
 
-    const spent =
-        meta + google + tiktok;
+    document.getElementById("remaining").innerText = "€" + remaining.toFixed(2);
+    document.getElementById("daily").innerText = "€" + daily.toFixed(2);
+    document.getElementById("daysLeft").innerText = daysLeft + " days left this month";
 
-    const remaining =
-        total - spent;
-
-    const today =
-        new Date();
-
-    const daysInMonth =
-        new Date(
-            today.getFullYear(),
-            today.getMonth()+1,
-            0
-        ).getDate();
-
-    const daysRemaining =
-        daysInMonth -
-        today.getDate() +
-        1;
-
-    const dailyBudget =
-        remaining > 0
-        ? remaining / daysRemaining
-        : 0;
-
-    document.getElementById(
-        "remainingBudget"
-    ).textContent =
-        "€" + remaining.toFixed(2);
-
-    document.getElementById(
-        "dailyBudget"
-    ).textContent =
-        "€" + dailyBudget.toFixed(2);
-
-    document.getElementById(
-        "daysRemaining"
-    ).textContent =
-        "Days remaining this month: "
-        + daysRemaining;
-
-    const progress =
-        total > 0
-        ? (spent / total) * 100
-        : 0;
-
-    document.getElementById(
-        "progressFill"
-    ).style.width =
-        Math.min(progress,100) + "%";
-
+    const progress = total > 0 ? (spent / total) * 100 : 0;
+    document.getElementById("progress").style.width = Math.min(progress,100) + "%";
 }
 
-document
-.getElementById("savedViews")
-.addEventListener("change",function(){
+/* EVENTS */
 
-    loadView(this.value);
+document.getElementById("viewSelect").addEventListener("change", function(){
 
+    const val = this.value;
+
+    if(!val){
+        createNewView();
+        return;
+    }
+
+    loadView(val);
 });
 
-document
-.querySelectorAll("input[type='number']")
-.forEach(input=>{
-
-    input.addEventListener("input",()=>{
-
+document.querySelectorAll("input").forEach(i=>{
+    i.addEventListener("input", ()=>{
         calculate();
-
-        autoSaveCurrentView();
-
+        autoSave();
     });
-
 });
+
+document.getElementById("deleteBtn").addEventListener("click", deleteView);
+
+/* INIT */
 
 refreshDropdown();
+
+const last = getCurrentView();
+if(last){
+    loadView(last);
+}
+
 calculate();
 
 </script>
