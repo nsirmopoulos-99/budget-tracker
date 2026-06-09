@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Tracker</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    max-width:600px;
+    margin:40px auto;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+}
+
+.input-group{
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+.result{
+    margin-top:30px;
+    padding:20px;
+    background:#f4f4f4;
+    border-radius:8px;
+}
+
+.value{
+    font-size:28px;
+    font-weight:bold;
+    color:#0066cc;
+}
+</style>
+</head>
+<body>
+
+<h1>Monthly Budget Tracker</h1>
+
+<div class="input-group">
+    <label>Total Budget (€)</label>
+    <input type="number" id="totalBudget" value="0">
+</div>
+
+<div class="input-group">
+    <label>Meta Spent (€)</label>
+    <input type="number" id="metaSpent" value="0">
+</div>
+
+<div class="input-group">
+    <label>Google Spent (€)</label>
+    <input type="number" id="googleSpent" value="0">
+</div>
+
+<div class="input-group">
+    <label>TikTok Spent (€)</label>
+    <input type="number" id="tiktokSpent" value="0">
+</div>
+
+<div class="result">
+    <p>Remaining Budget:</p>
+    <div class="value" id="remainingBudget">€0.00</div>
+
+    <hr>
+
+    <p>Recommended Daily Budget:</p>
+    <div class="value" id="dailyBudget">€0.00</div>
+
+    <p id="daysRemaining"></p>
+</div>
+
+<script>
+
+function calculate() {
+
+    const total =
+        Number(document.getElementById('totalBudget').value) || 0;
+
+    const meta =
+        Number(document.getElementById('metaSpent').value) || 0;
+
+    const google =
+        Number(document.getElementById('googleSpent').value) || 0;
+
+    const tiktok =
+        Number(document.getElementById('tiktokSpent').value) || 0;
+
+    const spent = meta + google + tiktok;
+
+    const remaining = total - spent;
+
+    const today = new Date();
+
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    const lastDayOfMonth =
+        new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    const currentDay = today.getDate();
+
+    const daysRemaining =
+        lastDayOfMonth - currentDay + 1;
+
+    const dailyBudget =
+        remaining > 0
+            ? remaining / daysRemaining
+            : 0;
+
+    document.getElementById('remainingBudget').textContent =
+        '€' + remaining.toFixed(2);
+
+    document.getElementById('dailyBudget').textContent =
+        '€' + dailyBudget.toFixed(2);
+
+    document.getElementById('daysRemaining').textContent =
+        `${daysRemaining} days remaining this month`;
+}
+
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', calculate);
+});
+
+calculate();
+
+</script>
+
+</body>
+</html>
