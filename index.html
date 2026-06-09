@@ -3,85 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Budget Tracker</title>
+
+<title>Budget Pacing Tool</title>
 
 <style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
 body{
-    font-family: Arial, sans-serif;
-    max-width:600px;
-    margin:40px auto;
-    padding:20px;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#f5f7fb;
+    padding:30px 15px;
+}
+
+.container{
+    max-width:650px;
+    margin:auto;
+}
+
+.card{
+    background:#fff;
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.08);
 }
 
 h1{
     text-align:center;
+    margin-bottom:10px;
+    color:#1f2937;
+}
+
+.subtitle{
+    text-align:center;
+    color:#6b7280;
+    margin-bottom:30px;
 }
 
 .input-group{
-    margin-bottom:15px;
+    margin-bottom:18px;
 }
 
 label{
     display:block;
-    margin-bottom:5px;
-    font-weight:bold;
+    margin-bottom:6px;
+    font-weight:600;
+    color:#374151;
 }
 
 input{
     width:100%;
-    padding:10px;
-    font-size:16px;
-    box-sizing:border-box;
+    padding:14px;
+    font-size:18px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    transition:0.2s;
 }
 
-.result{
+input:focus{
+    outline:none;
+    border-color:#2563eb;
+    box-shadow:0 0 0 4px rgba(37,99,235,0.15);
+}
+
+.summary{
     margin-top:30px;
-    padding:20px;
-    background:#f4f4f4;
-    border-radius:8px;
 }
 
-.value{
+.metric{
+    background:#f9fafb;
+    padding:16px;
+    border-radius:12px;
+    margin-bottom:12px;
+}
+
+.metric-title{
+    color:#6b7280;
+    font-size:14px;
+    margin-bottom:5px;
+}
+
+.metric-value{
     font-size:28px;
     font-weight:bold;
-    color:#0066cc;
+    color:#111827;
 }
+
+.progress-container{
+    margin-top:25px;
+}
+
+.progress-label{
+    margin-bottom:8px;
+    color:#374151;
+    font-weight:600;
+}
+
+.progress-bar{
+    width:100%;
+    height:18px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    width:0%;
+    background:#2563eb;
+    transition:0.3s;
+}
+
+.footer-info{
+    margin-top:15px;
+    text-align:center;
+    color:#6b7280;
+}
+
+@media(max-width:600px){
+
+.metric-value{
+    font-size:22px;
+}
+
+}
+
 </style>
 </head>
 <body>
 
-<h1>Monthly Budget Tracker</h1>
+<div class="container">
 
-<div class="input-group">
-    <label>Total Budget (€)</label>
-    <input type="number" id="totalBudget" value="0">
+<div class="card">
+
+<h1>📊 Budget Pacing Tool</h1>
+
+<div class="subtitle">
+Track campaign spend and calculate daily budget automatically
 </div>
 
 <div class="input-group">
-    <label>Meta Spent (€)</label>
-    <input type="number" id="metaSpent" value="0">
+<label>Total Budget (€)</label>
+<input type="number" id="totalBudget" placeholder="1000">
 </div>
 
 <div class="input-group">
-    <label>Google Spent (€)</label>
-    <input type="number" id="googleSpent" value="0">
+<label>Meta Spent (€)</label>
+<input type="number" id="metaSpent" placeholder="0">
 </div>
 
 <div class="input-group">
-    <label>TikTok Spent (€)</label>
-    <input type="number" id="tiktokSpent" value="0">
+<label>Google Spent (€)</label>
+<input type="number" id="googleSpent" placeholder="0">
 </div>
 
-<div class="result">
-    <p>Remaining Budget:</p>
-    <div class="value" id="remainingBudget">€0.00</div>
+<div class="input-group">
+<label>TikTok Spent (€)</label>
+<input type="number" id="tiktokSpent" placeholder="0">
+</div>
 
-    <hr>
+<div class="summary">
 
-    <p>Recommended Daily Budget:</p>
-    <div class="value" id="dailyBudget">€0.00</div>
+<div class="metric">
+<div class="metric-title">Remaining Budget</div>
+<div class="metric-value" id="remainingBudget">€0.00</div>
+</div>
 
-    <p id="daysRemaining"></p>
+<div class="metric">
+<div class="metric-title">Recommended Daily Budget</div>
+<div class="metric-value" id="dailyBudget">€0.00</div>
+</div>
+
+<div class="progress-container">
+
+<div class="progress-label">
+Budget Consumed
+</div>
+
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+
+</div>
+
+<div class="footer-info" id="daysRemaining">
+Days remaining this month: -
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 <script>
@@ -89,16 +205,16 @@ input{
 function calculate() {
 
     const total =
-        Number(document.getElementById('totalBudget').value) || 0;
+        Number(document.getElementById("totalBudget").value) || 0;
 
     const meta =
-        Number(document.getElementById('metaSpent').value) || 0;
+        Number(document.getElementById("metaSpent").value) || 0;
 
     const google =
-        Number(document.getElementById('googleSpent').value) || 0;
+        Number(document.getElementById("googleSpent").value) || 0;
 
     const tiktok =
-        Number(document.getElementById('tiktokSpent').value) || 0;
+        Number(document.getElementById("tiktokSpent").value) || 0;
 
     const spent = meta + google + tiktok;
 
@@ -106,34 +222,49 @@ function calculate() {
 
     const today = new Date();
 
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth();
+    const year = today.getFullYear();
+    const month = today.getMonth();
 
-    const lastDayOfMonth =
-        new Date(currentYear, currentMonth + 1, 0).getDate();
+    const daysInMonth =
+        new Date(year, month + 1, 0).getDate();
 
-    const currentDay = today.getDate();
+    const currentDay =
+        today.getDate();
 
     const daysRemaining =
-        lastDayOfMonth - currentDay + 1;
+        daysInMonth - currentDay + 1;
 
     const dailyBudget =
         remaining > 0
-            ? remaining / daysRemaining
-            : 0;
+        ? remaining / daysRemaining
+        : 0;
 
-    document.getElementById('remainingBudget').textContent =
-        '€' + remaining.toFixed(2);
+    document.getElementById("remainingBudget").innerText =
+        "€" + remaining.toFixed(2);
 
-    document.getElementById('dailyBudget').textContent =
-        '€' + dailyBudget.toFixed(2);
+    document.getElementById("dailyBudget").innerText =
+        "€" + dailyBudget.toFixed(2);
 
-    document.getElementById('daysRemaining').textContent =
-        `${daysRemaining} days remaining this month`;
+    document.getElementById("daysRemaining").innerText =
+        "Days remaining this month: " + daysRemaining;
+
+    const progress =
+        total > 0
+        ? (spent / total) * 100
+        : 0;
+
+    document.getElementById("progressFill").style.width =
+        Math.min(progress,100) + "%";
 }
 
-document.querySelectorAll('input').forEach(input => {
-    input.addEventListener('input', calculate);
+document.querySelectorAll("input").forEach(input => {
+
+    input.addEventListener("input", calculate);
+
+    input.addEventListener("focus", function(){
+        this.select();
+    });
+
 });
 
 calculate();
