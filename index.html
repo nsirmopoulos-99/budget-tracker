@@ -21,7 +21,7 @@ body{
 }
 
 .container{
-    max-width:650px;
+    max-width:700px;
     margin:auto;
 }
 
@@ -29,7 +29,7 @@ body{
     background:#fff;
     border-radius:16px;
     padding:25px;
-    box-shadow:0 8px 30px rgba(0,0,0,0.08);
+    box-shadow:0 8px 30px rgba(0,0,0,.08);
 }
 
 h1{
@@ -41,7 +41,24 @@ h1{
 .subtitle{
     text-align:center;
     color:#6b7280;
-    margin-bottom:30px;
+    margin-bottom:25px;
+}
+
+.section-title{
+    margin-bottom:10px;
+    font-weight:bold;
+    color:#374151;
+}
+
+.view-controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:25px;
+}
+
+.view-controls select,
+.view-controls input{
+    flex:1;
 }
 
 .input-group{
@@ -55,23 +72,50 @@ label{
     color:#374151;
 }
 
-input{
+input,
+select{
     width:100%;
     padding:14px;
-    font-size:18px;
+    font-size:16px;
     border:1px solid #d1d5db;
     border-radius:10px;
-    transition:0.2s;
 }
 
-input:focus{
+input:focus,
+select:focus{
     outline:none;
     border-color:#2563eb;
-    box-shadow:0 0 0 4px rgba(37,99,235,0.15);
+    box-shadow:0 0 0 4px rgba(37,99,235,.15);
+}
+
+.buttons{
+    display:flex;
+    gap:10px;
+    margin-bottom:25px;
+}
+
+button{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:14px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:bold;
+}
+
+.save-btn{
+    background:#2563eb;
+    color:white;
+}
+
+.delete-btn{
+    background:#ef4444;
+    color:white;
 }
 
 .summary{
-    margin-top:30px;
+    margin-top:10px;
 }
 
 .metric{
@@ -82,25 +126,18 @@ input:focus{
 }
 
 .metric-title{
-    color:#6b7280;
     font-size:14px;
-    margin-bottom:5px;
+    color:#6b7280;
 }
 
 .metric-value{
     font-size:28px;
     font-weight:bold;
-    color:#111827;
+    margin-top:4px;
 }
 
 .progress-container{
-    margin-top:25px;
-}
-
-.progress-label{
-    margin-bottom:8px;
-    color:#374151;
-    font-weight:600;
+    margin-top:20px;
 }
 
 .progress-bar{
@@ -115,7 +152,7 @@ input:focus{
     height:100%;
     width:0%;
     background:#2563eb;
-    transition:0.3s;
+    transition:.3s;
 }
 
 .footer-info{
@@ -125,6 +162,11 @@ input:focus{
 }
 
 @media(max-width:600px){
+
+.view-controls,
+.buttons{
+    flex-direction:column;
+}
 
 .metric-value{
     font-size:22px;
@@ -143,7 +185,30 @@ input:focus{
 <h1>📊 Budget Pacing Tool</h1>
 
 <div class="subtitle">
-Track campaign spend and calculate daily budget automatically
+Save multiple budget views locally
+</div>
+
+<div class="section-title">Saved Views</div>
+
+<div class="view-controls">
+<select id="savedViews">
+<option value="">Select View</option>
+</select>
+
+<input
+type="text"
+id="viewName"
+placeholder="New View Name">
+</div>
+
+<div class="buttons">
+<button class="save-btn" onclick="saveView()">
+💾 Save View
+</button>
+
+<button class="delete-btn" onclick="deleteView()">
+🗑 Delete View
+</button>
 </div>
 
 <div class="input-group">
@@ -170,27 +235,36 @@ Track campaign spend and calculate daily budget automatically
 
 <div class="metric">
 <div class="metric-title">Remaining Budget</div>
-<div class="metric-value" id="remainingBudget">€0.00</div>
+<div class="metric-value" id="remainingBudget">
+€0.00
+</div>
 </div>
 
 <div class="metric">
 <div class="metric-title">Recommended Daily Budget</div>
-<div class="metric-value" id="dailyBudget">€0.00</div>
+<div class="metric-value" id="dailyBudget">
+€0.00
+</div>
 </div>
 
 <div class="progress-container">
 
-<div class="progress-label">
+<div style="margin-bottom:8px;font-weight:bold;">
 Budget Consumed
 </div>
 
 <div class="progress-bar">
-<div class="progress-fill" id="progressFill"></div>
+<div
+class="progress-fill"
+id="progressFill">
+</div>
 </div>
 
 </div>
 
-<div class="footer-info" id="daysRemaining">
+<div
+class="footer-info"
+id="daysRemaining">
 Days remaining this month: -
 </div>
 
@@ -202,31 +276,176 @@ Days remaining this month: -
 
 <script>
 
+const STORAGE_KEY = "budget_pacing_views";
+
+function getViews() {
+    return JSON.parse(
+        localStorage.getItem(STORAGE_KEY)
+    ) || {};
+}
+
+function saveViews(views) {
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(views)
+    );
+}
+
+function refreshDropdown() {
+
+    const views = getViews();
+
+    const dropdown =
+        document.getElementById("savedViews");
+
+    dropdown.innerHTML =
+        '<option value="">Select View</option>';
+
+    Object.keys(views).forEach(name => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = name;
+        option.textContent = name;
+
+        dropdown.appendChild(option);
+
+    });
+
+}
+
+function saveView() {
+
+    const viewName =
+        document.getElementById("viewName")
+        .value
+        .trim();
+
+    if(!viewName){
+
+        alert("Please enter a view name");
+
+        return;
+    }
+
+    const views = getViews();
+
+    views[viewName] = {
+
+        totalBudget:
+            document.getElementById("totalBudget").value,
+
+        metaSpent:
+            document.getElementById("metaSpent").value,
+
+        googleSpent:
+            document.getElementById("googleSpent").value,
+
+        tiktokSpent:
+            document.getElementById("tiktokSpent").value
+
+    };
+
+    saveViews(views);
+
+    refreshDropdown();
+
+    document.getElementById("savedViews").value =
+        viewName;
+
+    alert("View saved!");
+
+}
+
+function loadView(name) {
+
+    const views = getViews();
+
+    if(!views[name]) return;
+
+    document.getElementById("totalBudget").value =
+        views[name].totalBudget;
+
+    document.getElementById("metaSpent").value =
+        views[name].metaSpent;
+
+    document.getElementById("googleSpent").value =
+        views[name].googleSpent;
+
+    document.getElementById("tiktokSpent").value =
+        views[name].tiktokSpent;
+
+    calculate();
+
+}
+
+function deleteView() {
+
+    const selected =
+        document.getElementById("savedViews").value;
+
+    if(!selected){
+
+        alert("Select a view");
+
+        return;
+    }
+
+    const views = getViews();
+
+    delete views[selected];
+
+    saveViews(views);
+
+    refreshDropdown();
+
+    document.getElementById("viewName").value = "";
+
+    alert("View deleted");
+
+}
+
 function calculate() {
 
     const total =
-        Number(document.getElementById("totalBudget").value) || 0;
+        Number(
+            document.getElementById("totalBudget").value
+        ) || 0;
 
     const meta =
-        Number(document.getElementById("metaSpent").value) || 0;
+        Number(
+            document.getElementById("metaSpent").value
+        ) || 0;
 
     const google =
-        Number(document.getElementById("googleSpent").value) || 0;
+        Number(
+            document.getElementById("googleSpent").value
+        ) || 0;
 
     const tiktok =
-        Number(document.getElementById("tiktokSpent").value) || 0;
+        Number(
+            document.getElementById("tiktokSpent").value
+        ) || 0;
 
-    const spent = meta + google + tiktok;
+    const spent =
+        meta + google + tiktok;
 
-    const remaining = total - spent;
+    const remaining =
+        total - spent;
 
-    const today = new Date();
+    const today =
+        new Date();
 
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    const year =
+        today.getFullYear();
+
+    const month =
+        today.getMonth();
 
     const daysInMonth =
-        new Date(year, month + 1, 0).getDate();
+        new Date(year, month + 1, 0)
+        .getDate();
 
     const currentDay =
         today.getDate();
@@ -239,33 +458,50 @@ function calculate() {
         ? remaining / daysRemaining
         : 0;
 
-    document.getElementById("remainingBudget").innerText =
+    document.getElementById("remainingBudget")
+        .innerText =
         "€" + remaining.toFixed(2);
 
-    document.getElementById("dailyBudget").innerText =
+    document.getElementById("dailyBudget")
+        .innerText =
         "€" + dailyBudget.toFixed(2);
 
-    document.getElementById("daysRemaining").innerText =
-        "Days remaining this month: " + daysRemaining;
+    document.getElementById("daysRemaining")
+        .innerText =
+        "Days remaining this month: "
+        + daysRemaining;
 
     const progress =
         total > 0
         ? (spent / total) * 100
         : 0;
 
-    document.getElementById("progressFill").style.width =
+    document.getElementById("progressFill")
+        .style.width =
         Math.min(progress,100) + "%";
+
 }
 
-document.querySelectorAll("input").forEach(input => {
+document
+.getElementById("savedViews")
+.addEventListener("change", function() {
 
-    input.addEventListener("input", calculate);
-
-    input.addEventListener("focus", function(){
-        this.select();
-    });
+    loadView(this.value);
 
 });
+
+document
+.querySelectorAll("input[type='number']")
+.forEach(input => {
+
+    input.addEventListener(
+        "input",
+        calculate
+    );
+
+});
+
+refreshDropdown();
 
 calculate();
 
